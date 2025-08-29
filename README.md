@@ -41,7 +41,7 @@ ai-project-analyzer/
 ### CLI Command -
 
 ```bash
-uv run packages/cli/src/main.py --input-file "./pos.csv" --output "./celo-reports-pos"
+uv run packages/cli/src/main.py --input-file "./pos.csv" --output "./mento-reports-pos"
 ```
 
 ### **1. Clone & Setup**
