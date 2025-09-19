@@ -122,20 +122,20 @@ def save_report(repo_name: str, analysis, output_dir: str) -> str:
     return report_path
 
 
-def extract_mento_scores_from_markdown(markdown_content: str) -> Dict[str, float]:
+def extract_self_scores_from_markdown(markdown_content: str) -> Dict[str, float]:
     """
-    Extract Mento-specific scores from markdown analysis content.
+    Extract Self-specific scores from markdown analysis content.
 
     Args:
         markdown_content: Markdown-formatted analysis text
 
     Returns:
-        Dict[str, float]: Dictionary of extracted Mento scores (0-10 scale with decimals)
+        Dict[str, float]: Dictionary of extracted Self scores (0-10 scale with decimals)
     """
     scores = {}
 
     # For debugging
-    logger.debug(f"Extracting Mento scores from markdown content of length: {len(markdown_content)}")
+    logger.debug(f"Extracting Self scores from markdown content of length: {len(markdown_content)}")
 
     # Check for the special case where content is wrapped in ```markdown blocks
     if markdown_content.startswith("```markdown") or markdown_content.startswith("```"):
@@ -179,10 +179,10 @@ def extract_mento_scores_from_markdown(markdown_content: str) -> Dict[str, float
                     score = round(score / 10, 1)
                     logger.debug(f"Converted to 0-10 scale: {score}")
 
-                # Map Mento-specific criteria names to standardized keys
-                if "mento sdk integration" in criterion or "sdk integration" in criterion:
-                    scores["mento_sdk"] = score
-                    logger.debug(f"Mapped to mento_sdk: {score}")
+                # Map Self-specific criteria names to standardized keys
+                if "self sdk integration" in criterion or "sdk integration" in criterion:
+                    scores["self_sdk"] = score
+                    logger.debug(f"Mapped to self_sdk: {score}")
                 elif "broker contract" in criterion or "broker usage" in criterion:
                     scores["broker_contract"] = score
                     logger.debug(f"Mapped to broker_contract: {score}")
@@ -207,9 +207,9 @@ def extract_mento_scores_from_markdown(markdown_content: str) -> Dict[str, float
     # If we couldn't find scores in a table, try individual patterns as fallback
     if not scores or len(scores) < 5:
         logger.debug(f"Falling back to individual patterns (current scores: {scores})")
-        # Define patterns to look for Mento-specific scores
+        # Define patterns to look for Self-specific scores
         patterns = {
-            "mento_sdk": r"Mento\s+SDK\s+Integration\s+Quality:?\s+(?:score)?\s*[:-]?\s*(\d+(?:\.\d+)?)(?:/10)?",
+            "self_sdk": r"Self\s+SDK\s+Integration\s+Quality:?\s+(?:score)?\s*[:-]?\s*(\d+(?:\.\d+)?)(?:/10)?",
             "broker_contract": r"Broker\s+Contract\s+Usage:?\s+(?:score)?\s*[:-]?\s*(\d+(?:\.\d+)?)(?:/10)?",
             "oracle_implementation": r"Oracle\s+Implementation:?\s+(?:score)?\s*[:-]?\s*(\d+(?:\.\d+)?)(?:/10)?",
             "swap_functionality": r"Swap\s+Functionality:?\s+(?:score)?\s*[:-]?\s*(\d+(?:\.\d+)?)(?:/10)?",
@@ -249,7 +249,7 @@ def extract_mento_scores_from_markdown(markdown_content: str) -> Dict[str, float
                 f"Calculated overall score: {scores['overall']} from {len(other_scores)} scores"
             )
 
-    logger.debug(f"Final extracted Mento scores: {scores}")
+    logger.debug(f"Final extracted Self scores: {scores}")
     return scores
 
 
@@ -629,16 +629,16 @@ def save_reports(
     return results
 
 
-def extract_mento_features_from_markdown(markdown_content: str) -> Dict[str, Any]:
+def extract_self_features_from_markdown(markdown_content: str) -> Dict[str, Any]:
     """
-    Extract Mento-specific features and implementation details from markdown analysis content.
-    Focuses exclusively on Mento Protocol integration, ignoring general Celo features.
+    Extract Self-specific features and implementation details from markdown analysis content.
+    Focuses exclusively on Self Protocol integration, ignoring general Celo features.
 
     Args:
         markdown_content: Markdown-formatted analysis text
 
     Returns:
-        Dict[str, Any]: Dictionary containing extracted Mento features and implementation details
+        Dict[str, Any]: Dictionary containing extracted Self features and implementation details
     """
     features = {
         "sdk_usage": [],
@@ -656,21 +656,21 @@ def extract_mento_features_from_markdown(markdown_content: str) -> Dict[str, Any
     if repo_match:
         features["repo_url"] = f"https://github.com/{repo_match.group(1)}"
 
-    # Extract Mento SDK usage (specific to Mento, not general Celo SDK)
+    # Extract Self SDK usage (specific to Self, not general Celo SDK)
     sdk_patterns = [
-        r"@mento-protocol/mento-sdk",
-        r"mento-sdk",
-        r"Mento SDK",
-        r"MentoSDK",
-        r"createMentoSDK",
-        r"mentoSdk\.",
+        r"@self-protocol/self-sdk",
+        r"self-sdk",
+        r"Self SDK",
+        r"SelfSDK",
+        r"createSelfSDK",
+        r"selfSdk\.",
     ]
     for pattern in sdk_patterns:
         if re.search(pattern, markdown_content, re.IGNORECASE):
             clean_pattern = pattern.replace("r\"", "").replace("\"", "")
             features["sdk_usage"].append(clean_pattern)
 
-    # Extract Mento broker integration details
+    # Extract Self broker integration details
     broker_patterns = [
         r"Broker contract",
         r"IBroker",
@@ -686,7 +686,7 @@ def extract_mento_features_from_markdown(markdown_content: str) -> Dict[str, Any
             clean_pattern = pattern.replace("r\"", "").replace("\"", "")
             features["broker_integration"].append(clean_pattern)
 
-    # Extract Mento oracle usage (SortedOracles specific to Mento)
+    # Extract Self oracle usage (SortedOracles specific to Self)
     oracle_patterns = [
         r"SortedOracles",
         r"ISortedOracles",
@@ -703,7 +703,7 @@ def extract_mento_features_from_markdown(markdown_content: str) -> Dict[str, Any
             clean_pattern = pattern.replace("r\"", "").replace("\"", "")
             features["oracle_usage"].append(clean_pattern)
 
-    # Extract Mento stable token usage
+    # Extract Self stable token usage
     stable_token_patterns = [
         r"cUSD",
         r"cEUR", 
@@ -722,18 +722,18 @@ def extract_mento_features_from_markdown(markdown_content: str) -> Dict[str, Any
         r"cNGN",
         r"StableToken",
         r"stable asset",
-        r"mento stable",
+        r"self stable",
     ]
     for pattern in stable_token_patterns:
         if re.search(pattern, markdown_content, re.IGNORECASE):
             clean_pattern = pattern.replace("r\"", "").replace("\"", "")
             features["stable_tokens"].append(clean_pattern)
 
-    # Extract Mento advanced features
+    # Extract Self advanced features
     advanced_patterns = [
         r"Multi-hop swap",
         r"Liquidity provision",
-        r"Arbitrage.*mento",
+        r"Arbitrage.*self",
         r"Circuit breaker",
         r"BreakerBox",
         r"BiPoolManager", 
@@ -742,14 +742,14 @@ def extract_mento_features_from_markdown(markdown_content: str) -> Dict[str, Any
         r"ConstantSum.*PricingModule",
         r"ConstantProduct.*PricingModule",
         r"Exchange.*Provider",
-        r"Mento.*Reserve",
+        r"Self.*Reserve",
     ]
     for pattern in advanced_patterns:
         if re.search(pattern, markdown_content, re.IGNORECASE):
             clean_pattern = pattern.replace("r\"", "").replace("\"", "")
             features["advanced_features"].append(clean_pattern)
 
-    # Extract technical assessment (Mento-specific section)
+    # Extract technical assessment (Self-specific section)
     assessment_section = re.search(
         r"## Technical Assessment.*?\n(.*?)(?=\n##|\n---|\Z)",
         markdown_content,
@@ -761,14 +761,14 @@ def extract_mento_features_from_markdown(markdown_content: str) -> Dict[str, Any
     return features
 
 
-def create_or_update_mento_summary(
+def create_or_update_self_summary(
     repo_name: str,
     analysis: Union[str, Dict[str, Any]],
     output_dir: str,
     repo_url: str = ""
 ) -> str:
     """
-    Create or update the mento-summary.md file with project analysis.
+    Create or update the self-summary.md file with project analysis.
 
     Args:
         repo_name: Name of the repository
@@ -777,15 +777,15 @@ def create_or_update_mento_summary(
         repo_url: GitHub URL of the repository (optional)
 
     Returns:
-        str: Path to the mento-summary.md file
+        str: Path to the self-summary.md file
     """
     ensure_directory_exists(output_dir)
-    summary_path = os.path.join(output_dir, "mento-summary.md")
+    summary_path = os.path.join(output_dir, "self-summary.md")
 
     # Extract scores and features
     if isinstance(analysis, str):
-        scores = extract_mento_scores_from_markdown(analysis)
-        features = extract_mento_features_from_markdown(analysis)
+        scores = extract_self_scores_from_markdown(analysis)
+        features = extract_self_features_from_markdown(analysis)
     else:
         # Handle dict format if needed
         scores = {}
@@ -811,7 +811,7 @@ def create_or_update_mento_summary(
     # Create implementation summary
     implementation_parts = []
     if features["sdk_usage"]:
-        implementation_parts.append("Mento SDK")
+        implementation_parts.append("Self SDK")
     if features["broker_integration"]:
         implementation_parts.append("Broker Contract")
     if features["oracle_usage"]:
@@ -836,12 +836,12 @@ def create_or_update_mento_summary(
 **Analysis Date**: {datetime.now().strftime('%Y-%m-%d')}  
 **Overall Rating**: {overall_score_display}
 
-**Key Mento Features Implemented:**
+**Key Self Features Implemented:**
 """
 
     # Add feature details
     if features["sdk_usage"]:
-        project_entry += f"- Mento SDK: {len(features['sdk_usage'])} features detected\n"
+        project_entry += f"- Self SDK: {len(features['sdk_usage'])} features detected\n"
     if features["broker_integration"]:
         project_entry += f"- Broker Integration: {len(features['broker_integration'])} features detected\n"
     if features["oracle_usage"]:
@@ -855,12 +855,12 @@ def create_or_update_mento_summary(
     if features["technical_assessment"]:
         project_entry += f"\n**Technical Assessment:**\n{features['technical_assessment'][:300]}...\n"
     else:
-        project_entry += f"\n**Technical Assessment:**\nOverall score of {overall_score_display} indicates {'excellent' if isinstance(overall_score, (int, float)) and overall_score >= 8 else 'good' if isinstance(overall_score, (int, float)) and overall_score >= 6 else 'fair' if isinstance(overall_score, (int, float)) and overall_score >= 4 else 'poor' if isinstance(overall_score, (int, float)) else 'unknown'} Mento integration quality.\n"
+        project_entry += f"\n**Technical Assessment:**\nOverall score of {overall_score_display} indicates {'excellent' if isinstance(overall_score, (int, float)) and overall_score >= 8 else 'good' if isinstance(overall_score, (int, float)) and overall_score >= 6 else 'fair' if isinstance(overall_score, (int, float)) and overall_score >= 4 else 'poor' if isinstance(overall_score, (int, float)) else 'unknown'} Self integration quality.\n"
 
     # Add scoring breakdown
     project_entry += f"""
 **Scoring Breakdown:**
-- Mento SDK Integration Quality: {scores.get('mento_sdk', 'N/A')}/10
+- Self SDK Integration Quality: {scores.get('self_sdk', 'N/A')}/10
 - Broker Contract Usage: {scores.get('broker_contract', 'N/A')}/10
 - Oracle Implementation: {scores.get('oracle_implementation', 'N/A')}/10
 - Swap Functionality: {scores.get('swap_functionality', 'N/A')}/10
@@ -872,7 +872,7 @@ def create_or_update_mento_summary(
 ---
 """
 
-    # Check if mento-summary.md already exists
+    # Check if self-summary.md already exists
     if os.path.exists(summary_path):
         # Read existing content
         with open(summary_path, "r", encoding="utf-8") as f:
@@ -894,7 +894,7 @@ def create_or_update_mento_summary(
             updated_content = existing_content + project_entry
 
         # Update the summary table
-        table_pattern = r"(\| GitHub Repository \| Mento Implementation \| Senior Developer Rating \(1-10\) \|\n\|[^\n]*\|[^\n]*\|[^\n]*\|\n)(.*?)(\n---)"
+        table_pattern = r"(\| GitHub Repository \| Self Implementation \| Senior Developer Rating \(1-10\) \|\n\|[^\n]*\|[^\n]*\|[^\n]*\|\n)(.*?)(\n---)"
         table_match = re.search(table_pattern, updated_content, re.DOTALL)
         
         if table_match:
@@ -921,15 +921,15 @@ def create_or_update_mento_summary(
                 table_header + updated_rows + table_footer
             )
     else:
-        # Create new mento-summary.md file
-        updated_content = f"""# Mento Protocol Integration Analysis Summary
+        # Create new self-summary.md file
+        updated_content = f"""# Self Protocol Integration Analysis Summary
 
-This file contains technical assessments of projects analyzed for their Mento Protocol integration quality, rated from the perspective of a senior blockchain developer.
+This file contains technical assessments of projects analyzed for their Self Protocol integration quality, rated from the perspective of a senior blockchain developer.
 
 ## Analysis Criteria
 
 Projects are evaluated on:
-- **Mento SDK Integration Quality** (0-10): Use of official SDK, proper implementation patterns
+- **Self SDK Integration Quality** (0-10): Use of official SDK, proper implementation patterns
 - **Broker Contract Usage** (0-10): Direct contract interactions, swap functionality
 - **Oracle Implementation** (0-10): SortedOracles integration, rate handling
 - **Swap Functionality** (0-10): Trading features, slippage protection, error handling
@@ -937,7 +937,7 @@ Projects are evaluated on:
 
 ## Project Evaluations
 
-| GitHub Repository | Mento Implementation | Senior Developer Rating (1-10) |
+| GitHub Repository | Self Implementation | Senior Developer Rating (1-10) |
 |------------------|---------------------|-------------------------------|
 | [{repo_name}]({final_repo_url}) | {implementation_summary} | {overall_score_display} |
 
@@ -951,5 +951,5 @@ Projects are evaluated on:
     with open(summary_path, "w", encoding="utf-8") as f:
         f.write(updated_content)
 
-    logger.info(f"Updated Mento summary at: {summary_path}")
+    logger.info(f"Updated Self summary at: {summary_path}")
     return summary_path

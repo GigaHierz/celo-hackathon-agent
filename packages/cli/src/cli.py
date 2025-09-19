@@ -24,7 +24,7 @@ sys.path.insert(0, str(project_root))
 from core.src.analyzer import AVAILABLE_MODELS, analyze_repositories
 from core.src.config import setup_logging
 from core.src.fetcher import fetch_repositories
-from core.src.reporter import save_reports, create_or_update_mento_summary
+from core.src.reporter import save_reports, create_or_update_self_summary
 
 app = typer.Typer(help="Analyze GitHub repositories using LLMs", add_completion=False)
 
@@ -38,9 +38,9 @@ def analyze(
         ..., "--github-urls", help="Comma-separated list of GitHub repository URLs"
     ),
     prompt: str = typer.Option(
-        "config/prompts/mento.txt", "--prompt", "-p", help="Path to the prompt file"
+        "config/prompts/self.txt", "--prompt", "-p", help="Path to the prompt file"
     ),
-    output: str = typer.Option("mento-reports-pos", "--output", "-o", help="Directory to save reports"),
+    output: str = typer.Option("self-reports-pos", "--output", "-o", help="Directory to save reports"),
     log_level: str = typer.Option(
         "INFO",
         "--log-level",
@@ -148,19 +148,19 @@ def analyze(
     rich_print("\nSaving analysis reports...")
     report_paths = save_reports(analyses, output)
 
-    # Generate Mento summary if using mento.txt prompt
-    if "mento.txt" in prompt.lower():
-        rich_print("\nGenerating Mento Protocol integration summary...")
+    # Generate self summary if using self.txt prompt
+    if "self.txt" in prompt.lower():
+        rich_print("\nGenerating Self Protocol integration summary...")
         output_dir = os.path.dirname(next(iter(report_paths.values())))
         
         for repo_name, analysis in analyses.items():
             try:
-                mento_summary_path = create_or_update_mento_summary(
+                self_summary_path = create_or_update_self_summary(
                     repo_name, analysis, output_dir
                 )
-                rich_print(f"[green]✓[/green] Updated Mento summary: {mento_summary_path}")
+                rich_print(f"[green]✓[/green] Updated Self summary: {self_summary_path}")
             except Exception as e:
-                rich_print(f"[yellow]⚠[/yellow] Could not update Mento summary for {repo_name}: {e}")
+                rich_print(f"[yellow]⚠[/yellow] Could not update Self summary for {repo_name}: {e}")
 
     # Print summary
     rich_print("\n[bold green]Analysis Complete![/bold green]")

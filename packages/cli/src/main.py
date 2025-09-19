@@ -22,7 +22,7 @@ from core.src.config import (
 )
 from core.src.fetcher import fetch_single_repository
 from core.src.file_parser import parse_input_file
-from core.src.reporter import generate_report_directory, save_single_report, create_or_update_mento_summary
+from core.src.reporter import generate_report_directory, save_single_report, create_or_update_self_summary
 
 
 def parse_args():
@@ -47,15 +47,15 @@ def parse_args():
     parser.add_argument(
         "--prompt",
         type=str,
-        default="config/prompts/mento.txt",
-        help="Path to the prompt file (default: config/prompts/mento.txt)",
+        default="config/prompts/self.txt",
+        help="Path to the prompt file (default: config/prompts/self.txt)",
     )
 
     parser.add_argument(
         "--output",
         type=str,
-        default="mento-reports-pos",
-        help="Directory to save reports (default: mento-reports-pos)",
+        default="self-reports-pos",
+        help="Directory to save reports (default: self-reports-pos)",
     )
 
     parser.add_argument(
@@ -229,17 +229,17 @@ def main():
         # Update all report paths
         all_report_paths.update(report_paths)
 
-        # Generate Mento summary if using mento.txt prompt
-        if "mento.txt" in args.prompt.lower():
+        # Generate self summary if using self.txt prompt
+        if "self.txt" in args.prompt.lower():
             try:
-                mento_summary_path = create_or_update_mento_summary(
+                self_summary_path = create_or_update_self_summary(
                     repo_name, analysis, report_dir
                 )
-                print(f"🔗 Updated Mento summary: {mento_summary_path}")
-                logging.info(f"Updated Mento summary: {mento_summary_path}")
+                print(f"🔗 Updated self summary: {self_summary_path}")
+                logging.info(f"Updated self summary: {self_summary_path}")
             except Exception as e:
-                print(f"⚠️  Could not update Mento summary for {repo_name}: {e}")
-                logging.warning(f"Could not update Mento summary for {repo_name}: {e}")
+                print(f"⚠️  Could not update self summary for {repo_name}: {e}")
+                logging.warning(f"Could not update self summary for {repo_name}: {e}")
 
         # Print progress indicator and current repository report path
         progress_percentage = (completed_repos / total_repos) * 100
